@@ -21,9 +21,9 @@ const registerUser = asyncHandler(async (req, res) => {
     [fullName, email, username, password].some((field) => field?.trim() === "")
   ) {
     throw new apiError(400, "All fields are required");
-  }
+  }  // check for empty fields
 
-  const existedUser = User.findOne({
+  const existedUser = await User.findOne({
     $or: [{ username }, { email }],
   });
 
@@ -31,9 +31,18 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new apiError(409, "User with email or username already existed");
   }
 
-  const avatarLocalPath = req.files?.avatar[0]?.path; // this req.file access has been provide by multer which gives us the path of the file
+  const avatarLocalPath = req.files?.avatar[0]?.path; // req.file access has been provide by multer which gives us the path of the file
 
-  const coverImageLocalPath = req.files?.coverImage[0]?.path;
+  //   const coverImageLocalPath = req.files?.coverImage[0]?.path;  --> it would give error if coverImage not passed
+
+  let coverImageLocalPath;
+  if (
+    req.files &&
+    Array.isArray(req.files.coverImage) &&
+    req.files.coverImage.length > 0
+  ) {
+    coverImageLocalPath = req.files.coverImage[0].path;
+  }
 
   if (!avatarLocalPath) {
     throw new apiError(400, "Avatar file is required");
@@ -55,7 +64,9 @@ const registerUser = asyncHandler(async (req, res) => {
     username: username.toLowerCase(),
   });
 
-  const createdUser = User.findById(user._id).select("-password -refreshToken");
+  const createdUser = await User.findById(user._id).select(
+    "-password -refreshToken"
+  ); // removing password and refresh token
 
   if (!createdUser) {
     throw new apiError(500, "Something went wrong while registering user");
