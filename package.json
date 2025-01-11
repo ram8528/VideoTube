@@ -1,0 +1,15 @@
+{
+  "name": "videotube",
+  "version": "1.0.0",
+  "description": "videotube",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Javascript",
+    "VideoTube"
+  ],
+  "author": "Ramdeep Kesharwani",
+  "license": "ISC"
+}
