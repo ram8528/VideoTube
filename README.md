@@ -23,3 +23,19 @@ const app = express();
         throw err
     }
 })()
+
+|||||
+request header -> from client
+response header -> from server
+representation header -> encoding/compression
+payload header -> data
+|||||
+
+----- most common headers
+accept, user-agent, authorization, content type, cookie, cache control
+
+----- 
+get,head,options,trace,delete,post,put,patch
+
+err, req, res, next
+-----
