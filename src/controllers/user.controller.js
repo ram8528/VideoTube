@@ -96,6 +96,7 @@ const registerUser = asyncHandler(async (req, res) => {
     .json(new apiResponse(200, createdUser, "User Registered Successfully"));
 });
 
+
 const loginUser = asyncHandler(async (req, res) => {
   // req body -> database
   // username or email
@@ -152,6 +153,7 @@ const loginUser = asyncHandler(async (req, res) => {
   );
 });
 
+
 const logoutUser = asyncHandler(async(req,res) => {
   await User.findByIdAndUpdate(
     req.user._id,{
@@ -175,6 +177,7 @@ const logoutUser = asyncHandler(async(req,res) => {
   .clearCookie("refreshToken",options)
   .json(new apiResponse(200, {}, "User logged out successfully"))
 });
+
 
 const refreshAccessToken = asyncHandler(async(req,res) => {
     const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
@@ -221,5 +224,6 @@ const refreshAccessToken = asyncHandler(async(req,res) => {
       throw new apiError(401,error?.message || "Invalid Refresh Token")
     }  
 });
+
 
 export { registerUser, loginUser ,logoutUser, refreshAccessToken};
