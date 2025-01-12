@@ -88,3 +88,5 @@ userSchema.methods.generateRefreshToken = function() {
 }
 
 export const User = mongoose.model('User',userSchema);
+
+// accesstoken short lived refreshtoken long lived
