@@ -53,6 +53,6 @@ router
   .patch(VerifyJWT, upload.single("/coverImage"), updateUserCoverImage);
 
 router.route("/c/:username").get(VerifyJWT, getUserChannelProfile);
-
+// c is just an alias it could be anything like channel or ram 
 router.route("/history").get(VerifyJWT, getWatchHistory);
 export default router;
