@@ -161,8 +161,8 @@ const logoutUser = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(
     req.user._id,
     {
-      $set: {
-        refreshToken: undefined,
+      $unset: {
+        refreshToken: 1,   /// or use set and then refreshToken : null
       },
     },
     {
@@ -300,8 +300,8 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user?._id).select("avatar");
 
   if(user.avatar) {
-    // const publicId = user.avatar.split('/').pop().split('.')[0];
-    const publicId = cloudinary.utils.extractPublicId(user.avatar);
+    const publicId = user.avatar.split('/').pop().split('.')[0];
+    // const publicId = cloudinary.utils.extractPublicId(user.avatar);
     await cloudinary.uploader.destroy(publicId);
   }
 
@@ -338,7 +338,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user?._id).select("coverImage");
 
   if(user.coverImage) {
-    const publicId = cloudinary.utils.extractPublicId(user.coverImage);
+    const publicId = user.coverImage.split('/').pop().split('.')[0];
     await cloudinary.uploader.destroy(publicId);
   }
 
