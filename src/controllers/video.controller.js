@@ -15,12 +15,12 @@ const publishAVideo = asyncHandler(async (req, res) => {
   const { title, description } = req.body;
   // TODO: get video, upload to cloudinary, create video
 
-  if (!(title || description)) {
+  if (!(title && description)) {
     return apiError(400, "Title and Descriptions required");
   }
 
-  const videoFilePath = req?.files?.path;
-  const thumbnailPath = req?.files?.path;
+  const videoFilePath = req?.files?.video?.path;
+  const thumbnailPath = req?.files?.thumbnail?.path;
 
   if (!(videoFilePath || thumbnailPath)) {
     throw new apiError(400, "Missing video file or thumbnail missing");
@@ -32,8 +32,8 @@ const publishAVideo = asyncHandler(async (req, res) => {
   const duration = videoFile.duration;
 
   const video = await Video.create({
-    videoFile,
-    thumbnail,
+    videoFile : videoFile.url,
+    thumbnail : thumbnail.url,
     title,
     description,
     duration,
@@ -128,12 +128,45 @@ const updateVideo = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new apiResponse(200, updateData, "Video updated successfully"));
+    .json(new apiResponse(200, updatedVideo, "Video updated successfully"));
 });
 
 const deleteVideo = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
   //TODO: delete video
+  if (!isValidObjectId(videoId)) {
+    throw new apiError(400, "Invalid video id");
+  }
+
+  const video = await Video.findById(videoId);
+
+  if (!video) {
+    throw new apiError(400, "Video not found ");
+  }
+
+  if (video.owner.toString() !== req.user?._id.toString()) {
+    throw new apiError(403, "You are not authorized to delete this video");
+  }
+
+  try {
+    if (video.videoFile) {
+      const publicId = video.videoFile.split("/").pop().split(".")[0];
+      await uploadOnCloudinary.uploader.destroy(publicId);
+    }
+
+    if (video.thumbnail) {
+      const publicId = video.thumbnail.split("/").pop().split(".")[0];
+      await uploadOnCloudinary.uploader.destroy(publicId);
+    }
+  } catch (error) {
+    throw new apiError(500, "Error deleting video from cloudinary");
+  }
+
+  await Video.findByIdAndDelete(videoId);
+
+  return res
+    .status(200)
+    .json(new apiResponse(200, {}, "Video Deleted Successfully"));
 });
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
@@ -141,23 +174,21 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
 
   const video = await Video.findById(videoId);
 
-  if(!video) {
-    throw new apiError(404, 'Video with this id not found');
+  if (!video) {
+    throw new apiError(404, "Video with this id not found");
   }
 
   video.isPublished = !video.isPublished;
 
   const updatedVideo = await video.save();
 
-  return res
-  .status(200)
-  .json(
-    new apiResponse (
-        200,
-        {
-            isPublished : updatedVideo.isPublished
-        },
-        "Video publish status updated successfully"
+  return res.status(200).json(
+    new apiResponse(
+      200,
+      {
+        isPublished: updatedVideo.isPublished,
+      },
+      "Video publish status updated successfully"
     )
   );
 });
