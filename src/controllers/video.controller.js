@@ -9,6 +9,68 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 const getAllVideos = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
   //TODO: get all videos based on query, sort, pagination
+
+  // calculate the number of documents to skip for pagination
+  const skip = (page - 1) * limit;
+
+  // initialize an empty fiter object to build query condition
+  const filter = {};
+
+  // Add a filter for videos owned by a specific user(if userId is provided)
+  if (userId) {
+    filter.owner = new mongoose.Types.ObjectId(userId);
+  }
+
+  if (query) {
+    filter.$or = [
+      {
+        title: {
+          $regex: query,
+          $options: "i",
+        },
+      },
+      {
+        description: {
+          $regex: query,
+          $options: "i",
+        },
+      },
+    ];
+  }
+
+  const pipeline = [
+    {
+      $match: filter,
+    },
+    {
+      $sort: {
+        [sortBy]: sortType === "asc" ? 1 : -1,
+      },
+    },
+    {
+      $skip: skip,
+    },
+    {
+      $limit: parseInt(limit),
+    },
+  ];
+
+  const videos = await Video.aggregate(pipeline);
+
+  const totalCount = await Video.countDocuments(filter);
+
+  return res.status(200).json(
+    new apiResponse(
+      200, 
+      {
+        data: videos,
+        totalCount: totalCount, // Total number of matching documents
+        skip: skip, // Number of documents skipped
+        limit: limit, // Number of documents per page
+      },
+      "Videos retrieved successfully" 
+    )
+  );
 });
 
 const publishAVideo = asyncHandler(async (req, res) => {
@@ -32,8 +94,8 @@ const publishAVideo = asyncHandler(async (req, res) => {
   const duration = videoFile.duration;
 
   const video = await Video.create({
-    videoFile : videoFile.url,
-    thumbnail : thumbnail.url,
+    videoFile: videoFile.url,
+    thumbnail: thumbnail.url,
     title,
     description,
     duration,
