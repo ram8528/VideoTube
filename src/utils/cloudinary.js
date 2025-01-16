@@ -1,32 +1,31 @@
-import { v2 as cloudinary} from "cloudinary";
+import { v2 as cloudinary } from "cloudinary";
 // cloudinary is just an alias you can use any name
 import fs from "fs";
 
 cloudinary.config({
-    cloud_name : process.env.CLOUDINARY_CLOUD_NAME,
-    api_key : process.env.CLOUDINARY_API_KEY,
-    api_secret : process.env.CLOUDINARY_API_SECRET
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 // uploading file via multer then fetch it to local system and then on cloudinary
 
 const uploadOnCloudinary = async (localFilePath) => {
-    try {
-        if(!localFilePath) return null;
+  try {
+    if (!localFilePath) return null;
 
-        const response = await cloudinary.uploader.upload(
-            localFilePath,{
-                resource_type: "auto"
-            })
+    const response = await cloudinary.uploader.upload(localFilePath, {
+      resource_type: "auto",
+    });
 
-        // console.log("File is uploaded on cloudinary successfully ", response.url);
+    // console.log("File is uploaded on cloudinary successfully ", response);
 
-        fs.unlinkSync(localFilePath);
-        return response;
-    } catch (error) {
-        fs.unlinkSync(localFilePath); // remove locally saved temporary files as the upload operation got failed
-        return null;
-    }
-}
+    fs.unlinkSync(localFilePath);
+    return response;
+  } catch (error) {
+    fs.unlinkSync(localFilePath); // remove locally saved temporary files as the upload operation got failed
+    return null;
+  }
+};
 
-export { uploadOnCloudinary};
+export { uploadOnCloudinary };

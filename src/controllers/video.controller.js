@@ -61,14 +61,14 @@ const getAllVideos = asyncHandler(async (req, res) => {
 
   return res.status(200).json(
     new apiResponse(
-      200, 
+      200,
       {
         data: videos,
         totalCount: totalCount, // Total number of matching documents
         skip: skip, // Number of documents skipped
         limit: limit, // Number of documents per page
       },
-      "Videos retrieved successfully" 
+      "Videos retrieved successfully"
     )
   );
 });
@@ -81,21 +81,53 @@ const publishAVideo = asyncHandler(async (req, res) => {
     return apiError(400, "Title and Descriptions required");
   }
 
-  const videoFilePath = req?.files?.video?.path;
-  const thumbnailPath = req?.files?.thumbnail?.path;
+  // Validating the title and description length
+  if (title.length > 100 || description.length > 500) {
+    throw new apiError(
+      400,
+      "Title or Description Length does not meet the criteria"
+    );
+  }
 
-  if (!(videoFilePath || thumbnailPath)) {
+  // check if a video with same title and description aleready exists
+  const existingVideo = await Video.findOne({ title, description });
+  if (existingVideo) {
+    throw new apiError(400, "Video with same title and description detected");
+  }
+
+  const videoFilePath = req.files?.videoFile[0].path;
+  const thumbnailPath = req.files?.thumbnail[0].path;
+
+  if (!videoFilePath || !thumbnailPath) {
     throw new apiError(400, "Missing video file or thumbnail missing");
+  }
+
+  // Validate thumbnail file type
+  const thumbnailFile = req.files.thumbnail[0];
+  const allowedThumbnailTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+  if (!allowedThumbnailTypes.includes(thumbnailFile.mimetype)) {
+    throw new apiError(400, "Invalid thumbnail file type. Only jpg, jpeg, and png are allowed");
   }
 
   const videoFile = await uploadOnCloudinary(videoFilePath);
   const thumbnail = await uploadOnCloudinary(thumbnailPath);
 
-  const duration = videoFile.duration;
+  // validate the videofile length
+  if (videoFile.size > 500 * 1024 * 1024) {
+    throw new apiError(400, "Video file size is too large");
+  }
+  // validate thumbnail Length
+  if (thumbnail.size > 100 * 1024 * 1024) {
+    throw new apiError(400, "thumbnail size is too large");
+  }
+
+  const duration = videoFile?.duration;
 
   const video = await Video.create({
-    videoFile: videoFile.url,
-    thumbnail: thumbnail.url,
+    // videoFile: videoFile.url,
+    videoFile: videoFile.secure_url,
+    // thumbnail : thumbnail.url,
+    thumbnail: thumbnail.secure_url,
     title,
     description,
     duration,
