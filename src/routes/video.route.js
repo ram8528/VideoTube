@@ -23,7 +23,7 @@ router.use(VerifyJWT);
 
 // Protected Route: Publish a video (requires JWT for authentication)
 router.post(
-  "/",
+  "/publishAVideo",
   upload.fields([
     { name: "videoFile", maxCount: 1 },
     { name: "thumbnail", maxCount: 1 },
@@ -41,6 +41,22 @@ router.patch("/:videoId", upload.single("thumbnail"), updateVideo);
 router.patch("/toggle/publish/:videoId", togglePublishStatus);
 
 export default router;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // const router = Router();
 // router.use(VerifyJWT); // Apply verifyJWT middleware to all routes in this file

@@ -1,10 +1,10 @@
 import mongoose, { isValidObjectId } from "mongoose";
 import { Video } from "../models/video.model.js";
-import { User } from "../models/user.model.js";
 import { apiError } from "../utils/apiError.js";
 import { apiResponse } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { v2 as cloudinary } from "cloudinary";
 
 const getAllVideos = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
@@ -104,9 +104,12 @@ const publishAVideo = asyncHandler(async (req, res) => {
 
   // Validate thumbnail file type
   const thumbnailFile = req.files.thumbnail[0];
-  const allowedThumbnailTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+  const allowedThumbnailTypes = ["image/jpeg", "image/png", "image/jpg"];
   if (!allowedThumbnailTypes.includes(thumbnailFile.mimetype)) {
-    throw new apiError(400, "Invalid thumbnail file type. Only jpg, jpeg, and png are allowed");
+    throw new apiError(
+      400,
+      "Invalid thumbnail file type. Only jpg, jpeg, and png are allowed"
+    );
   }
 
   const videoFile = await uploadOnCloudinary(videoFilePath);
@@ -148,6 +151,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
 
 const getVideoById = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
+  // console.log(videoId);
   //TODO: get video by id
 
   if (!isValidObjectId(videoId)) {
@@ -187,7 +191,7 @@ const updateVideo = asyncHandler(async (req, res) => {
   }
 
   const { title, description } = req.body;
-  const thumbnailPath = req.file?.path;
+  const thumbnailPath = req.files?.path;
 
   const updateData = { title, description };
 
@@ -245,12 +249,12 @@ const deleteVideo = asyncHandler(async (req, res) => {
   try {
     if (video.videoFile) {
       const publicId = video.videoFile.split("/").pop().split(".")[0];
-      await uploadOnCloudinary.uploader.destroy(publicId);
+      await cloudinary.uploader.destroy(publicId);
     }
 
     if (video.thumbnail) {
       const publicId = video.thumbnail.split("/").pop().split(".")[0];
-      await uploadOnCloudinary.uploader.destroy(publicId);
+      await cloudinary.uploader.destroy(publicId);
     }
   } catch (error) {
     throw new apiError(500, "Error deleting video from cloudinary");
