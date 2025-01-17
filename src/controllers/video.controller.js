@@ -7,7 +7,7 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { v2 as cloudinary } from "cloudinary";
 
 const getAllVideos = asyncHandler(async (req, res) => {
-  const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
+  const { page = 1, limit = 20, query, sortBy, sortType, userId } = req.query;
   //TODO: get all videos based on query, sort, pagination
 
   // calculate the number of documents to skip for pagination
@@ -291,6 +291,30 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
   );
 });
 
+const getVideoByUserId = asyncHandler(async(req,res) => {
+    const {userId} = req.params;
+
+    if(!isValidObjectId(userId)) {
+      throw new apiError (400, "User not authenticated");
+    }
+
+    const videos = await Video.find({owner : userId}).populate("owner","username");
+
+    if(!videos.length) {
+      throw new apiError(404, "No videos found for this user")
+    }
+
+    return res
+    .status(200)
+    .json(
+      new apiResponse(
+        200,
+        videos,
+        "Videos found Successfully"
+      )
+    );
+});
+
 export {
   getAllVideos,
   publishAVideo,
@@ -298,4 +322,5 @@ export {
   updateVideo,
   deleteVideo,
   togglePublishStatus,
+  getVideoByUserId
 };

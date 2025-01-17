@@ -1,6 +1,5 @@
 import mongoose, { isValidObjectId } from "mongoose"
 import {Tweet} from "../models/tweet.model.js"
-import {User} from "../models/user.model.js"
 import {apiError} from "../utils/apiError.js"
 import {apiResponse} from "../utils/apiResponse.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
@@ -82,8 +81,10 @@ const updateTweet = asyncHandler(async (req, res) => {
     if(!tweet) {
         throw new apiError(404,"Tweet not found");
     }
+    // console.log(tweet.owner.toString())
+    // console.log(req.user._id.toString());
 
-    if(tweet.owner.toString() !== req.user._id) {
+    if(tweet.owner.toString() !== req.user?._id.toString()) {
         throw new apiError(404, "You are not authorized to update the tweet")
     }
 
@@ -110,11 +111,11 @@ const deleteTweet = asyncHandler(async (req, res) => {
         throw new apiError(400, "No tweet found");
     }
 
-    if(tweet.owner.toString() !== req.user._id) {
+    if(tweet.owner.toString() !== req.user._id.toString()) {
         throw new apiError(400, 'You are not authorized to delete this tweet');
     }
 
-    await tweet.remove();
+    await Tweet.findByIdAndDelete(tweetId);
 
     return res
     .status(200)
