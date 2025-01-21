@@ -73,8 +73,11 @@ const getPlaylistById = asyncHandler(async (req, res) => {
     throw new apiError(400, `Playlist with ID ${playlistId} not found`);
   }
 
-  if(playlist.owner.toString() !== req.user?._id.toString()) {
-    throw new apiError(403, "You do not have permission to access this playlist")
+  if (playlist.owner.toString() !== req.user?._id.toString()) {
+    throw new apiError(
+      403,
+      "You do not have permission to access this playlist"
+    );
   }
 
   return res
@@ -91,8 +94,8 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
 
   const video = await Video.findById(videoId);
 
-  if(!video) {
-    throw new apiError(404, `Video with ID ${videoId} not found`)
+  if (!video) {
+    throw new apiError(404, `Video with ID ${videoId} not found`);
   }
 
   const playlist = await Playlist.findByIdAndUpdate(
@@ -108,7 +111,7 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
   );
 
   if (!playlist) {
-    throw new apiError(404,  `Playlist with ID ${playlistId} not found`);
+    throw new apiError(404, `Playlist with ID ${playlistId} not found`);
   }
 
   return res
