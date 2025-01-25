@@ -63,7 +63,10 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
     throw new apiError(400, "Tweet Id is invalid");
   }
 
-  const existingLike = await Like.findOne({ tweet: tweetId, likedBy: userId });
+  const existingLike = await Like.findOne({
+    tweet: tweetId,
+    likedBy: userId,
+  });
 
   if (existingLike) {
     await Like.deleteOne({ _id: existingLike._id });
@@ -155,4 +158,11 @@ const getLikedTweets = asyncHandler(async (req, res) => {
     );
 });
 
-export { toggleCommentLike, toggleTweetLike, toggleVideoLike, getLikedVideos , getLikedComments , getLikedTweets};
+export {
+  toggleCommentLike,
+  toggleTweetLike,
+  toggleVideoLike,
+  getLikedVideos,
+  getLikedComments,
+  getLikedTweets,
+};

@@ -80,7 +80,7 @@ const updateComment = asyncHandler(async (req, res) => {
     throw new apiError(404, "Comment not found");
   }
 
-  if (content.owner.toString() !== req.user._id.toString()) {
+  if (comment.owner.toString() !== req.user._id.toString()) {
     throw new apiError(403, "You are not authorized to update the comment");
   }
 
