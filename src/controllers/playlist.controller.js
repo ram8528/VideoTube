@@ -1,6 +1,7 @@
 import mongoose, { isValidObjectId } from "mongoose";
+import { validateObjectId } from "../utils/validator.js";
 import { Playlist } from "../models/playlist.model.js";
-import {Video} from "../models/video.model.js";
+import { Video } from "../models/video.model.js";
 import { apiError } from "../utils/apiError.js";
 import { apiResponse } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -10,9 +11,7 @@ const createPlaylist = asyncHandler(async (req, res) => {
   const userId = req.user?._id;
 
   //TODO: create playlist
-  if (!isValidObjectId(userId)) {
-    throw new apiError(400, "User ID is not valid");
-  }
+  validateObjectId(userId, "User ID");
 
   if (!name || !description) {
     throw new apiError(400, "Playlist Name and Description are required");
@@ -35,9 +34,7 @@ const createPlaylist = asyncHandler(async (req, res) => {
 const getUserPlaylists = asyncHandler(async (req, res) => {
   const { userId } = req.params;
   //TODO: get user playlists
-  if (!isValidObjectId(userId)) {
-    throw new apiError(400, "User Id is invalid");
-  }
+  validateObjectId(userId, "User ID");
 
   const { page = 1, limit = 10 } = req.query;
 
@@ -64,9 +61,7 @@ const getPlaylistById = asyncHandler(async (req, res) => {
   const { playlistId } = req.params;
   //TODO: get playlist by id
 
-  if (!isValidObjectId(playlistId)) {
-    throw new apiError(400, "Playlist id is invalid");
-  }
+  validateObjectId(playlistId, "Playlist ID");
 
   const playlist = await Playlist.findById(playlistId);
 
@@ -155,9 +150,7 @@ const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
 const deletePlaylist = asyncHandler(async (req, res) => {
   const { playlistId } = req.params;
   // TODO: delete playlist
-  if (!isValidObjectId(playlistId)) {
-    throw new apiError(400, "Playlist id is invalid");
-  }
+  validateObjectId(playlistId, "Playlist ID");
 
   const playlist = await Playlist.findByIdAndDelete(playlistId);
 
@@ -174,9 +167,7 @@ const updatePlaylist = asyncHandler(async (req, res) => {
   const { playlistId } = req.params;
   const { name, description } = req.body;
   //TODO: update playlist
-  if (!isValidObjectId(playlistId)) {
-    throw new apiError(400, "Playlist id is invalid");
-  }
+  validateObjectId(playlistId, "Playlist ID");
 
   if (!name || !description) {
     throw new apiError(400, "Name and Description are required");

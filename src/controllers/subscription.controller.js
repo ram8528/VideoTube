@@ -1,5 +1,5 @@
 import mongoose, { isValidObjectId } from "mongoose";
-import { User } from "../models/user.model.js";
+import { validateObjectId } from "../utils/validator.js";
 import { Subscription } from "../models/subscription.model.js";
 import { apiError } from "../utils/apiError.js";
 import { apiResponse } from "../utils/apiResponse.js";
@@ -10,13 +10,9 @@ const toggleSubscription = asyncHandler(async (req, res) => {
   // TODO: toggle subscription
   const userId = req.user?._id;
 
-  if (!isValidObjectId(channelId)) {
-    throw new apiError(400, "Channel id is invalid");
-  }
+  validateObjectId(userId, "User ID");
 
-  if (!isValidObjectId(userId)) {
-    throw new apiError(400, "User id is invalid");
-  }
+  validateObjectId(channelId, "Channel ID");
 
   const existingSubscription = await Subscription.findOne({
     subscriber: userId,
@@ -50,9 +46,7 @@ const toggleSubscription = asyncHandler(async (req, res) => {
 const getUserChannelSubscribers = asyncHandler(async (req, res) => {
   const { channelId } = req.params;
 
-  if (!isValidObjectId(channelId)) {
-    throw new apiError(400, "channel id is invalid");
-  }
+  validateObjectId(channelId, "Channel ID");
 
   const subscribers = await Subscription.find({
     channel: channelId,
@@ -77,9 +71,7 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
 const getSubscribedChannels = asyncHandler(async (req, res) => {
   const { subscriberId } = req.params;
 
-  if (!isValidObjectId(subscriberId)) {
-    throw new apiError(400, "Subscriber id found invalid");
-  }
+  validateObjectId(subscriberId, "Subscriber ID");
 
   const subscriptions = await Subscription.find({ subscriber: subscriberId })
     .populate("channel", "username email")

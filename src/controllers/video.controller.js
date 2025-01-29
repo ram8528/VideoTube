@@ -1,4 +1,5 @@
 import mongoose, { isValidObjectId } from "mongoose";
+import { validateObjectId } from "../utils/validator.js";
 import { Video } from "../models/video.model.js";
 import { apiError } from "../utils/apiError.js";
 import { apiResponse } from "../utils/apiResponse.js";
@@ -154,9 +155,10 @@ const getVideoById = asyncHandler(async (req, res) => {
   // console.log(videoId);
   //TODO: get video by id
 
-  if (!isValidObjectId(videoId)) {
-    throw new apiError(400, "Invalid Video ID");
-  }
+  // if (!isValidObjectId(videoId)) {
+  //   throw new apiError(400, "Invalid Video ID");
+  // }
+  validateObjectId(videoId, "Video ID");
 
   const video = await Video.findById(videoId).populate(
     "owner",
@@ -176,9 +178,7 @@ const updateVideo = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
   //TODO: update video details like title, description, thumbnail
 
-  if (!isValidObjectId(videoId)) {
-    throw new apiError(400, "Invalid Video ID");
-  }
+  validateObjectId(videoId, "Video ID");
 
   const video = await Video.findById(videoId);
 
@@ -232,9 +232,7 @@ const updateVideo = asyncHandler(async (req, res) => {
 const deleteVideo = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
   //TODO: delete video
-  if (!isValidObjectId(videoId)) {
-    throw new apiError(400, "Invalid video id");
-  }
+  validateObjectId(videoId, "Video ID");
 
   const video = await Video.findById(videoId);
 
@@ -270,6 +268,8 @@ const deleteVideo = asyncHandler(async (req, res) => {
 const togglePublishStatus = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
 
+  validateObjectId(videoId, "Video ID");
+
   const video = await Video.findById(videoId);
 
   if (!video) {
@@ -291,28 +291,23 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
   );
 });
 
-const getVideoByUserId = asyncHandler(async(req,res) => {
-    const {userId} = req.params;
+const getVideoByUserId = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
 
-    if(!isValidObjectId(userId)) {
-      throw new apiError (400, "User not authenticated");
-    }
+  validateObjectId(userId, "User ID");
 
-    const videos = await Video.find({owner : userId}).populate("owner","username");
+  const videos = await Video.find({ owner: userId }).populate(
+    "owner",
+    "username"
+  );
 
-    if(!videos.length) {
-      throw new apiError(404, "No videos found for this user")
-    }
+  if (!videos.length) {
+    throw new apiError(404, "No videos found for this user");
+  }
 
-    return res
+  return res
     .status(200)
-    .json(
-      new apiResponse(
-        200,
-        videos,
-        "Videos found Successfully"
-      )
-    );
+    .json(new apiResponse(200, videos, "Videos found Successfully"));
 });
 
 export {
@@ -322,5 +317,5 @@ export {
   updateVideo,
   deleteVideo,
   togglePublishStatus,
-  getVideoByUserId
+  getVideoByUserId,
 };
