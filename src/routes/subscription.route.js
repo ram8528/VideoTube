@@ -15,7 +15,7 @@ router
     .post(toggleSubscription);
 
 router
-    .route("/u/:subscriberId")
+    .route("/c/:subscriberId")
     .get(getSubscribedChannels)
 
 router.route("/u/:channelId").get(getUserChannelSubscribers);

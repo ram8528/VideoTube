@@ -5,14 +5,12 @@ import { apiError } from "../utils/apiError.js";
 import { apiResponse } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
-
-
 const toggleSubscription = asyncHandler(async (req, res) => {
   const { channelId } = req.params;
   // TODO: toggle subscription
   const userId = req.user?._id;
 
-  if(!isValidObjectId(channelId)) {
+  if (!isValidObjectId(channelId)) {
     throw new apiError(400, "Channel id is invalid");
   }
 
@@ -26,7 +24,7 @@ const toggleSubscription = asyncHandler(async (req, res) => {
   });
 
   if (existingSubscription) {
-    // unsubscribe 
+    // unsubscribe
     await Subscription.deleteOne({
       _id: existingSubscription._id,
     });
@@ -34,18 +32,17 @@ const toggleSubscription = asyncHandler(async (req, res) => {
     return res
       .status(200)
       .json(new apiResponse(200, "Unsubscribed Successfully"));
-  }
-  else{
+  } else {
     const newSubscription = new Subscription({
-      subscriber : userId,
-      channel : channelId
+      subscriber: userId,
+      channel: channelId,
     });
 
     await newSubscription.save();
 
     return res
-    .status(201)
-    .json(new apiResponse(201, newSubscription, "Subscribed Successfully"));
+      .status(201)
+      .json(new apiResponse(201, newSubscription, "Subscribed Successfully"));
   }
 });
 
@@ -53,8 +50,8 @@ const toggleSubscription = asyncHandler(async (req, res) => {
 const getUserChannelSubscribers = asyncHandler(async (req, res) => {
   const { channelId } = req.params;
 
-  if(!isValidObjectId(channelId)) {
-    throw new apiError(400, 'channel id is invalid')
+  if (!isValidObjectId(channelId)) {
+    throw new apiError(400, "channel id is invalid");
   }
 
   const subscribers = await Subscription.find({
@@ -86,6 +83,7 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
 
   const subscriptions = await Subscription.find({ subscriber: subscriberId })
     .populate("channel", "username email")
+    .populate("subscriber", "username email")
     .exec();
 
   if (!subscriptions || subscriptions.length === 0) {

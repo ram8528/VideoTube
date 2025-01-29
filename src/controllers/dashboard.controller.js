@@ -18,12 +18,17 @@ const getChannelStats = asyncHandler(async (req, res) => {
     channel: channelId,
   });
 
-  const totalVideos = await Video.countDocuments({ channel: channelId });
+  const videos = await Video.find({ owner: channelId });
+  // console.log(videos)
+
+  if (!Array.isArray(videos)) {
+    throw new apiError(500, "Error retrieving videos for this channel");
+  }
 
   const totalViews = await Video.aggregate([
     {
       $match: {
-        channel: mongoose.Types.ObjectId(channelId),
+        owner: new mongoose.Types.ObjectId(channelId)
       },
     },
     {
@@ -38,7 +43,7 @@ const getChannelStats = asyncHandler(async (req, res) => {
     {
       $match: {
         video: {
-          $in: totalVideos.map((video) => video._id),
+          $in: videos.map((video) => video._id),
         },
       },
     },
@@ -54,7 +59,7 @@ const getChannelStats = asyncHandler(async (req, res) => {
 
   const stats = {
     totalSubscribers,
-    totalVideos,
+    totalVideos : videos.length,
     totalViews: totalViews[0]?.totalViews || 0,
     totalLikes: totalLikes[0]?.totalLikes || 0,
   };
