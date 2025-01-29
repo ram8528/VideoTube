@@ -1,41 +1,41 @@
-# VideoTube
+# VideoTube Backend
 
-This is a backend with Javascript VideoTube
-// require("dotenv").config({path: './env'})
-#Less Preffered approach to connect DB 
-import express from "express";
-const app = express();
-// ;(()=>{})()  -> IIFE
+This is the backend for the VideoTube application, a platform for users to upload, view, and interact with videos. This backend is built using Node.js, Express, and MongoDB.
 
-( async() => {
-    try {
-        await mongoose.connect(`${process.env.MONGODB_URI}/${DB_NAME}`)
-        app.on("error" , (error) => {
-            console.log("Error : ",error);
-            throw error
-        })
+## Table of Contents
 
-        app.listen(process.env.PORT,() => {
-            console.log(`Server is running on port ${process.env.PORT}`);
-        })
-    } catch (error) {
-        console.log("Error : ",error)
-        throw err
-    }
-})()
+- [Installation](#installation)
+- [Usage](#usage)
+- [API Endpoints](#api-endpoints)
+  - [Authentication](#authentication)
+  - [Users](#users)
+  - [Videos](#videos)
+  - [Playlists](#playlists)
+  - [Subscriptions](#subscriptions)
+  - [Dashboard](#dashboard)
+- [Models](#models)
+- [Middleware](#middleware)
+- [Error Handling](#error-handling)
+- [Testing](#testing)
+- [Contributing](#contributing)
+- [License](#license)
 
-|||||
-request header -> from client
-response header -> from server
-representation header -> encoding/compression
-payload header -> data
-|||||
+## Installation
 
------ most common headers
-accept, user-agent, authorization, content type, cookie, cache control
+1. **Clone the repository:**
 
------ 
-get,head,options,trace,delete,post,put,patch
+   ```bash
+   git clone https://github.com/yourusername/videotube-backend.git
+   cd videotube-backend
 
-err, req, res, next
------
+   Install dependencies:
+
+Set up environment variables:    npm install
+
+Create a .env file in the root directory and add the following variables:
+PORT=3000
+MONGODB_URI=mongodb://localhost:27017/videotube
+JWT_SECRET=your_jwt_secret
+
+Start the server:  npm start
+
